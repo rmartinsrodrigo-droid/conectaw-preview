@@ -1,0 +1,1026 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Conect a|w — Portal Corporativo</title>
+<meta name="description" content="Portal corporativo da Athié Wohnrath. O espaço onde pessoas, projetos e informações se conectam."/>
+
+<!-- ═══════════════════════════════════════════════════════════
+     FONT — Plus Jakarta Sans
+═══════════════════════════════════════════════════════════ -->
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+
+<!-- ═══════════════════════════════════════════════════════════
+     TAILWIND — CDN + config customizado (design tokens AW)
+═══════════════════════════════════════════════════════════ -->
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          primary:        '#00C7C7',
+          'primary-hover':'#00B2B2',
+          dark:           '#111111',
+          'gray-soft':    '#F5F5F5',
+          'text-main':    '#202124',
+          'text-mute':    '#6B7280',
+          'border-soft':  '#E5E7EB',
+        },
+        fontFamily: {
+          sans: ['"Plus Jakarta Sans"', 'system-ui', '-apple-system', 'sans-serif'],
+        },
+        maxWidth: {
+          container: '1440px',
+        },
+        boxShadow: {
+          'card':       '0 1px 2px rgba(16,24,40,.06), 0 1px 3px rgba(16,24,40,.10)',
+          'card-hover': '0 12px 24px -8px rgba(16,24,40,.18), 0 4px 8px -4px rgba(16,24,40,.10)',
+        },
+        spacing: {
+          18: '4.5rem',
+        },
+        transitionDuration: { 250: '250ms' },
+      }
+    }
+  }
+</script>
+
+<style>
+  /* ─── Reset fino & base ─── */
+  html { scroll-behavior: smooth; }
+  body { font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif; -webkit-font-smoothing: antialiased; }
+
+  /* ─── Skip link p/ teclado (acessibilidade) ─── */
+  .skip-link { position: absolute; top: -100px; left: 0; background:#111; color:#00C7C7; padding:12px 20px; font-weight:700; z-index:10000; }
+  .skip-link:focus { top: 0; }
+
+  /* ─── Foco visível global ─── */
+  *:focus-visible { outline: 3px solid #00C7C7; outline-offset: 2px; }
+  .on-primary:focus-visible { outline-color: #111; }
+
+  /* ─── Marquee infinito ─── */
+  @keyframes ticker { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+  .ticker-track { animation: ticker 90s linear infinite; }
+  .ticker-track:hover { animation-play-state: paused; }
+
+  /* ─── Reduced motion ─── */
+  @media (prefers-reduced-motion: reduce) {
+    .ticker-track { animation: none; }
+    *, *::before, *::after { transition-duration: .01ms !important; animation-duration: .01ms !important; }
+  }
+
+  /* ─── Underline animado nos links de "ver todas / ver todos" ─── */
+  .link-underline { position: relative; }
+  .link-underline::after { content:''; position:absolute; left:0; bottom:-2px; width:0; height:1.5px; background: currentColor; transition: width 250ms ease; }
+  .link-underline:hover::after { width: 100%; }
+
+  /* ─── Hover lift para cards de notícia ─── */
+  .news-card { transition: transform 250ms ease, box-shadow 250ms ease, border-color 250ms ease; }
+  .news-card:hover { transform: translateY(-6px); }
+
+  /* ─── Active nav-item underline ─── */
+  .nav-item[aria-current="page"]::after,
+  .nav-item.active::after { content:''; position:absolute; left:0; right:0; bottom:0; height:2px; background:#00C7C7; }
+
+  /* ─── Vaga card hover ─── */
+  .vaga-card { transition: border-color 200ms, background-color 200ms, box-shadow 200ms; }
+  .vaga-card:hover { border-color:#00C7C7; background:#F0FDFD; }
+  .vaga-card:hover .vaga-arrow { color:#00B2B2; transform: translateX(3px); }
+  .vaga-arrow { transition: color 200ms, transform 200ms; }
+
+  /* ─── Item ativo da playlist de treinamentos ─── */
+  .playlist-item.active { background: rgba(0,199,199,.08); border-left-color: #00C7C7; }
+  .playlist-item.active .playlist-num { background: #00C7C7; color: #111; }
+  .playlist-item.active .playlist-title { color: #fff; font-weight: 600; }
+  .playlist-item.active .playlist-meta { color: #00C7C7; }
+
+  /* ─── Carousel dots (hero) ─── */
+  .hero-dot { width: 6px; height: 6px; border-radius: 999px; background: rgba(255,255,255,.5); transition: width 250ms, background 250ms; }
+  .hero-dot.active { width: 28px; background: #00C7C7; }
+
+  /* ─── Play overlay no vídeo ─── */
+  .play-overlay { transition: background 250ms; }
+  .play-overlay:hover { background: linear-gradient(180deg, rgba(0,0,0,.25) 0%, rgba(0,0,0,.55) 100%); }
+  .play-overlay svg { transition: transform 250ms cubic-bezier(.34,1.56,.64,1); filter: drop-shadow(0 6px 20px rgba(0,0,0,.4)); }
+  .play-overlay:hover svg { transform: scale(1.08); }
+  .play-overlay.hidden { display: none; }
+
+  /* ─── Status colors no ticker ─── */
+  .t-ontrack { color:#22C55E; }
+  .t-late    { color:#EF4444; }
+  .t-done    { color:#00C7C7; }
+  .t-noeval  { color:#F59E0B; }
+</style>
+</head>
+
+<body class="bg-white text-text-main">
+
+<!-- Skip link p/ acessibilidade -->
+<a href="#main" class="skip-link">Pular para o conteúdo principal</a>
+
+<!-- ═══════════════════════════════════════════════════════════
+     HEADER — Sticky, 72px, dark
+═══════════════════════════════════════════════════════════ -->
+<header id="site-header" class="sticky top-0 z-50 bg-dark">
+  <div class="mx-auto max-w-container px-6 lg:px-10 h-18 flex items-center gap-8" style="height:72px">
+
+    <!-- Logo -->
+    <a href="#/" class="flex items-center text-white text-xl font-extrabold tracking-tight whitespace-nowrap" aria-label="Conect a|w — Portal Athié Wohnrath">
+      Conect<span class="text-primary">a|w</span>
+    </a>
+
+    <!-- Nav desktop -->
+    <nav class="hidden lg:flex items-center gap-1 flex-1" aria-label="Navegação principal" id="nav-desktop">
+      <!-- nav items injected by JS -->
+    </nav>
+
+    <!-- Actions -->
+    <div class="flex items-center gap-3 ml-auto">
+      <a href="#/central-de-servicos"
+         class="hidden sm:inline-flex items-center px-4 py-2.5 rounded-lg bg-primary hover:bg-primary-hover text-dark text-sm font-bold tracking-wide uppercase transition-colors duration-250 on-primary">
+        Gestão de Horas
+      </a>
+      <button type="button" aria-label="Buscar"
+              class="p-2.5 rounded-lg text-white/70 hover:text-white hover:bg-white/5 transition-colors">
+        <!-- Heroicons: magnifying-glass -->
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+        </svg>
+      </button>
+      <button type="button" id="btn-mobile" aria-label="Abrir menu" aria-controls="nav-mobile" aria-expanded="false"
+              class="lg:hidden p-2.5 rounded-lg text-white hover:bg-white/5 transition-colors">
+        <svg id="icon-menu" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+          <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+        </svg>
+        <svg id="icon-close" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="hidden" aria-hidden="true">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Mobile nav -->
+  <nav id="nav-mobile" class="lg:hidden hidden bg-dark border-t border-white/10" aria-label="Menu mobile"></nav>
+</header>
+
+<!-- ═══════════════════════════════════════════════════════════
+     TICKER — Andamento das obras
+═══════════════════════════════════════════════════════════ -->
+<div role="region" aria-label="Status de projetos e obras" class="bg-dark border-b border-white/5 overflow-hidden">
+  <div class="flex items-center h-10">
+    <div class="flex items-center px-5 h-full bg-primary">
+      <span class="text-[11px] font-extrabold text-dark uppercase tracking-widest whitespace-nowrap">Projetos / Obras</span>
+    </div>
+    <div class="relative flex-1 overflow-hidden">
+      <div class="absolute left-0 top-0 w-12 h-full bg-gradient-to-r from-dark to-transparent z-10 pointer-events-none"></div>
+      <div class="absolute right-0 top-0 w-12 h-full bg-gradient-to-l from-dark to-transparent z-10 pointer-events-none"></div>
+      <div id="ticker-track" class="ticker-track inline-flex items-center h-10 whitespace-nowrap"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     MAIN
+═══════════════════════════════════════════════════════════ -->
+<main id="main">
+
+<!-- ─── HERO 70/30 ─── -->
+<section class="mx-auto max-w-container px-6 lg:px-10 pt-8 pb-6" aria-label="Destaques">
+  <div class="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-6 lg:gap-8 items-stretch">
+
+    <!-- Featured card -->
+    <a href="#/noticia/politicas-corporativas"
+       class="group relative block overflow-hidden rounded-2xl bg-dark aspect-[16/9] lg:aspect-auto lg:min-h-[540px] shadow-card">
+      <img src="noticia-home.jpg" alt="Equipe da Athié Wohnrath em escritório" loading="lazy"
+           class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03]"/>
+      <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-black/10"></div>
+
+      <div class="absolute inset-0 p-8 lg:p-10 flex flex-col justify-end">
+        <span class="inline-flex items-center self-start px-3 py-1.5 rounded-md bg-primary text-dark text-[11px] font-extrabold uppercase tracking-[0.14em] mb-5">
+          Processos
+        </span>
+        <h2 class="text-3xl lg:text-4xl font-bold text-white leading-tight tracking-tight max-w-[80%] mb-4">
+          Políticas Corporativas atualizadas
+        </h2>
+        <p class="text-white/90 text-base leading-relaxed max-w-[68%] mb-5 line-clamp-2">
+          Revisamos e estruturamos nossas políticas internas para trazer mais clareza, alinhamento entre as áreas e segurança nos processos, tudo disponível aqui no ConectAW.
+        </p>
+        <div class="flex items-center justify-between">
+          <div class="inline-flex items-center gap-2 text-primary text-sm font-semibold">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+            </svg>
+            <span>Há 2 horas</span>
+          </div>
+          <!-- Carousel dots (decorativos por enquanto) -->
+          <div class="flex items-center gap-2" aria-hidden="true">
+            <span class="hero-dot active"></span>
+            <span class="hero-dot"></span>
+            <span class="hero-dot"></span>
+          </div>
+        </div>
+      </div>
+    </a>
+
+    <!-- Indica AW (card branco) -->
+    <aside class="bg-white rounded-2xl border border-border-soft shadow-card flex flex-col overflow-hidden" aria-label="Programa Indica AW — vagas abertas">
+      <header class="px-6 pt-6 pb-4">
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="text-sm font-extrabold tracking-[0.16em] text-text-main uppercase">Vagas</h2>
+          <span class="inline-flex items-center px-3 py-1 rounded-full bg-primary text-dark text-xs font-bold whitespace-nowrap">
+            26 vagas abertas
+          </span>
+        </div>
+        <p class="text-sm text-text-mute leading-relaxed">
+          Indique pra gente. Confiamos na sua referência.
+        </p>
+      </header>
+
+      <div class="px-6 pb-2 flex items-center gap-3">
+        <span class="text-[11px] font-bold tracking-[0.12em] uppercase text-text-mute">Interiores</span>
+        <span class="flex-1 h-px bg-border-soft"></span>
+        <span class="text-xs font-bold text-text-mute">5</span>
+      </div>
+
+      <ul id="vagas-list" class="px-6 py-3 flex-1 flex flex-col gap-2.5" role="list"></ul>
+
+      <div class="px-6 pb-6 pt-2">
+        <button type="button"
+                class="w-full inline-flex items-center justify-center gap-2.5 h-12 rounded-xl bg-primary hover:bg-primary-hover text-dark font-bold text-sm transition-colors duration-250 on-primary">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+            <circle cx="9" cy="7" r="4"/>
+            <line x1="19" y1="8" x2="19" y2="14"/>
+            <line x1="22" y1="11" x2="16" y2="11"/>
+          </svg>
+          Indicar uma pessoa
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M12 2l1.5 6.5L20 10l-6.5 1.5L12 18l-1.5-6.5L4 10l6.5-1.5L12 2z"/>
+          </svg>
+        </button>
+      </div>
+    </aside>
+
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SEÇÃO NOTÍCIAS — Acontece na a|w
+═══════════════════════════════════════════════════════════ -->
+<section class="mx-auto max-w-container px-6 lg:px-10 pt-12 pb-20" aria-labelledby="news-heading">
+
+  <div class="flex items-end justify-between gap-6 mb-10">
+    <h2 id="news-heading" class="text-xl lg:text-[24px] font-bold tracking-tight text-text-main leading-tight">
+      Acontece na a|w
+    </h2>
+    <a href="#/noticias" class="link-underline text-sm font-semibold text-text-main hover:text-primary-hover transition-colors inline-flex items-center gap-1.5 self-end pb-1">
+      Ver todas
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+      </svg>
+    </a>
+  </div>
+
+  <div id="news-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"></div>
+
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════
+     UNIVERSIDADE A|W — Treinamentos (bg preto)
+═══════════════════════════════════════════════════════════ -->
+<section class="bg-dark text-white" aria-labelledby="training-heading">
+  <div class="mx-auto max-w-container px-6 lg:px-10 py-16 lg:py-20">
+    <div class="grid grid-cols-1 lg:grid-cols-[1fr_2fr] gap-10 lg:gap-12 items-start">
+
+      <!-- Coluna esquerda: título + descrição + CTA -->
+      <div class="lg:pr-4">
+        <span class="block text-[11px] font-extrabold tracking-[0.18em] uppercase text-primary mb-3">
+          Universidade a|w
+        </span>
+        <h2 id="training-heading" class="text-3xl lg:text-[40px] font-bold tracking-tight leading-tight mb-5">
+          Treinamentos
+        </h2>
+        <p class="text-white/70 text-base leading-relaxed mb-8 max-w-md">
+          Desenvolva suas habilidades com conteúdos práticos e relevantes para o seu dia a dia.
+        </p>
+        <a href="#/aw/universidade-aw"
+           class="inline-flex items-center gap-2 px-5 py-3 rounded-lg border border-white/15 bg-white/5 hover:bg-white/10 text-sm font-semibold transition-colors duration-250">
+          Ver todos os treinamentos
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+          </svg>
+        </a>
+      </div>
+
+      <!-- Coluna direita: player + playlist -->
+      <div class="grid grid-cols-1 md:grid-cols-[1.4fr_1fr] gap-6">
+
+        <!-- Player -->
+        <div class="relative aspect-video rounded-xl overflow-hidden bg-black/40">
+          <video id="vid-video" src="ppp.mp4" playsinline preload="metadata"
+                 class="absolute inset-0 w-full h-full object-contain bg-black"></video>
+          <button type="button" id="vid-play-overlay" aria-label="Reproduzir vídeo"
+                  class="play-overlay absolute inset-0 flex items-center justify-center bg-gradient-to-b from-black/20 to-black/50">
+            <svg width="80" height="80" viewBox="0 0 88 88" fill="none" aria-hidden="true">
+              <circle cx="44" cy="44" r="42" fill="#00C7C7"/>
+              <polygon points="36,28 64,44 36,60" fill="#111"/>
+            </svg>
+          </button>
+          <div id="vid-info" class="absolute left-4 bottom-4 right-4 z-10 pointer-events-none hidden">
+            <span id="vid-cat" class="block text-[10px] font-extrabold tracking-[0.14em] uppercase text-primary mb-1">Universidade a|w</span>
+            <p id="vid-name" class="text-white text-sm font-semibold leading-snug line-clamp-2 drop-shadow-md">
+              PPP — Aprenda como utilizar a ferramenta que vai apoiar suas entregas.
+            </p>
+          </div>
+        </div>
+
+        <!-- Playlist -->
+        <ol id="playlist" class="flex flex-col" aria-label="Lista de treinamentos"></ol>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- ═══════════════════════════════════════════════════════════
+     FOOTER — Dark, 4 colunas
+═══════════════════════════════════════════════════════════ -->
+<footer class="bg-dark text-white">
+  <div class="mx-auto max-w-container px-6 lg:px-10 pt-16 pb-10">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
+
+      <!-- Brand -->
+      <div>
+        <img src="logo-aw-branco.png" alt="Athié Wohnrath" class="h-7 w-auto mb-5"/>
+        <p class="text-white/55 text-sm leading-relaxed mb-5 max-w-xs">
+          O espaço onde pessoas, projetos e informações se conectam para transformar excelência em resultados.
+        </p>
+        <div class="flex items-center gap-2">
+          <a href="https://www.youtube.com/@athiewohnrathoficial" target="_blank" rel="noopener" aria-label="YouTube"
+             class="p-2 rounded-lg bg-white/5 hover:bg-primary/15 text-white/70 hover:text-primary transition-colors">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M22.54 6.42a2.78 2.78 0 0 0-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46a2.78 2.78 0 0 0-1.95 1.96A29 29 0 0 0 1 12a29 29 0 0 0 .46 5.58 2.78 2.78 0 0 0 1.95 1.95C5.12 20 12 20 12 20s6.88 0 8.59-.47a2.78 2.78 0 0 0 1.95-1.95A29 29 0 0 0 23 12a29 29 0 0 0-.46-5.58z"/>
+              <polygon points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02"/>
+            </svg>
+          </a>
+          <a href="https://www.instagram.com/athiewohnrath/" target="_blank" rel="noopener" aria-label="Instagram"
+             class="p-2 rounded-lg bg-white/5 hover:bg-primary/15 text-white/70 hover:text-primary transition-colors">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+              <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
+              <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/>
+            </svg>
+          </a>
+          <a href="https://www.linkedin.com/company/athiewohnrath" target="_blank" rel="noopener" aria-label="LinkedIn"
+             class="p-2 rounded-lg bg-white/5 hover:bg-primary/15 text-white/70 hover:text-primary transition-colors">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/>
+              <rect x="2" y="9" width="4" height="12"/>
+              <circle cx="4" cy="4" r="2"/>
+            </svg>
+          </a>
+        </div>
+      </div>
+
+      <!-- Menu -->
+      <div>
+        <h3 class="text-[11px] font-bold uppercase tracking-[0.12em] text-white/40 mb-4">Menu</h3>
+        <ul class="flex flex-col gap-3 text-sm text-white/60">
+          <li><a href="#/aw" class="hover:text-white transition-colors">AW</a></li>
+          <li><a href="#/gente-e-gestao" class="hover:text-white transition-colors">Gente e Gestão</a></li>
+          <li><a href="#/central-de-servicos" class="hover:text-white transition-colors">Central de Serviços</a></li>
+          <li><a href="#/inteligencia-artificial" class="hover:text-white transition-colors">Inteligência Artificial</a></li>
+          <li><a href="#/workspace" class="hover:text-white transition-colors">Workspace</a></li>
+          <li><a href="#/qsms" class="hover:text-white transition-colors">QSMS</a></li>
+        </ul>
+      </div>
+
+      <!-- Institucional -->
+      <div>
+        <h3 class="text-[11px] font-bold uppercase tracking-[0.12em] text-white/40 mb-4">Institucional</h3>
+        <ul class="flex flex-col gap-3 text-sm text-white/60">
+          <li><a href="#/aw" class="hover:text-white transition-colors">Sobre a a|w</a></li>
+          <li><a href="#/gente-e-gestao" class="hover:text-white transition-colors">Carreira</a></li>
+          <li><a href="#/qsms" class="hover:text-white transition-colors">ESG</a></li>
+          <li><a href="#/aw" class="hover:text-white transition-colors">Canal de Denúncias</a></li>
+        </ul>
+      </div>
+
+      <!-- Suporte -->
+      <div>
+        <h3 class="text-[11px] font-bold uppercase tracking-[0.12em] text-white/40 mb-4">Suporte</h3>
+        <ul class="flex flex-col gap-3 text-sm text-white/60">
+          <li><a href="#/central-de-servicos" class="hover:text-white transition-colors">Abrir chamado de TI</a></li>
+          <li><a href="#/central-de-servicos" class="hover:text-white transition-colors">Acompanhar chamado</a></li>
+          <li><a href="#/central-de-servicos" class="hover:text-white transition-colors">Gestão de Horas</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="mt-12 pt-6 border-t border-white/10 flex flex-wrap items-center justify-between gap-3 text-xs text-white/30">
+      <p>&copy; 2026 Athié Wohnrath. Todos os direitos reservados.</p>
+      <p>Conect a|w — Portal Corporativo</p>
+    </div>
+  </div>
+</footer>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SCRIPTS — Dados + render dos componentes
+═══════════════════════════════════════════════════════════ -->
+<script>
+/* ─────────────────────────────────────────────
+   DATA
+───────────────────────────────────────────── */
+const PRIMARY = '#00C7C7';
+
+const hubMenus = [
+  { label:'Início', slug:'inicio', href:'#/', active:true, items:null },
+
+  { label:'AW', slug:'aw', items:[
+    { label:'Metodologia e Padrões', children:[
+      { label:'Brown Paper', children:[
+        { label:'Interiores' }, { label:'Predial e retrofit' }
+      ]},
+      { label:'Gestão', children:[
+        { label:'Rituais de gestão' }, { label:'Comunicação' },
+        { label:'Comercial' }, { label:'Gestão de documentos' }
+      ]},
+      { label:'Arquitetura / Ferramentas', children:[
+        { label:'Revit' }, { label:'ShopDrawing' }, { label:'Checklist SD' }
+      ]},
+      { label:'Obras / Ferramentas', children:[
+        { label:'AW Check' }, { label:'Controle de obra' },
+        { label:'Planejamento / MS Project' }, { label:'Medições financeiras' },
+        { label:'Fotos' }
+      ]},
+      { label:'DNN', children:[
+        { label:'Valores técnicos' }, { label:'Calculadoras' }
+      ]},
+    ]},
+    { label:'Universidade a|w', children:[
+      { label:'Base de conteúdos', children:[
+        { label:'Vídeos' }, { label:'PDFs' }, { label:'Páginas' }, { label:'Índices' }
+      ]}
+    ]},
+    { label:'Conhecimento Técnico', children:[
+      { label:'Disciplinas técnicas' }, { label:'Cursos' }, { label:'Workshops' },
+      { label:'Tendências' }, { label:'Inspirações' }, { label:'Conteúdos parceiros' },
+      { label:'Lições Aprendidas' }
+    ]},
+    { label:'Políticas Administrativas', children:[
+      { label:'Governança e Diretrizes', children:[
+        { label:'Código de ética e conduta' }, { label:'Canal de Denúncias' },
+        { label:'Comitê de compliance' }, { label:'Confidencialidade e dados' },
+        { label:'Acordos de responsabilidade' }, { label:'Segurança da informação' },
+        { label:'Conflito de interesses' }, { label:'Brindes e presentes' },
+        { label:'Políticas de Pessoas' }, { label:'Políticas Financeiras' }
+      ]}
+    ]},
+  ]},
+
+  { label:'Gente e Gestão', slug:'gente-e-gestao', items:[
+    { label:'Onboarding', children:[
+      { label:'Apresentação Onboarding' }, { label:'Conteúdos institucionais' }
+    ]},
+    { label:'Diretório de Pessoas', children:[
+      { label:'Funcionários SP' }, { label:'Funcionários RJ' }, { label:'Aniversariantes' }
+    ]},
+    { label:'Empresa & Cultura', children:[
+      { label:'Sobre a a|w' }, { label:'Áreas' },
+      { label:'Comunicados Internos' }, { label:'Organograma' }
+    ]},
+    { label:'Reconhecimento', children:[
+      { label:'Mandou Bem' }, { label:'Atitude a|w' }
+    ]},
+    { label:'Benefícios & Programas', children:[
+      { label:'Programas e benefícios' }, { label:'Parcerias' }
+    ]},
+    { label:'Carreira', children:[
+      { label:'Vagas' }, { label:'Indica a|w' }, { label:'Descrição de cargos' },
+      { label:'Avaliação de desempenho' }, { label:'Inclusão' }
+    ]},
+    { label:'PRO', children:[
+      { label:'Arquitetura' }, { label:'Interiores' }, { label:'Retrofit' },
+      { label:'Construtora' }, { label:'Comercial' }, { label:'CSC' }
+    ]},
+    { label:'Lojinha a|w' },
+  ]},
+
+  { label:'Central de Serviços', slug:'central-de-servicos', items:[
+    { label:'Chamados & Suporte', children:[
+      { label:'Abrir chamado de TI' }, { label:'Acompanhar chamado' }
+    ]},
+    { label:'Solicitações', children:[
+      { label:'Materiais de escritório e equipamentos' }, { label:'Placas de obra' },
+      { label:'Placas para sala de Guerra' }, { label:'Personalização de Tapume' },
+      { label:'Personalização de Capacete' }, { label:'Etiquetas de tubulações' },
+      { label:'Impressões' }, { label:'Reserva de estação (vaga rotativa)' },
+      { label:'a|w mobile (instruções)' },
+      { label:'Viagens', children:[
+        { label:'Solicitação de viagem' }, { label:'Adiantamento' }, { label:'Política de viagens' }
+      ]}
+    ]},
+    { label:'Aprovações', children:[
+      { label:'Aprovação de mapas' }, { label:'Aprovação de ocorrências' },
+      { label:'Aprovação de reembolso' }
+    ]},
+    { label:'Documentos & Arquivos', children:[
+      { label:'Gerador de link' }, { label:'Controle de impressões' },
+      { label:'Organizador de e-mails' }, { label:'Permissão de avisos por WhatsApp' }
+    ]},
+  ]},
+
+  { label:'Inteligência Artificial', slug:'inteligencia-artificial', items:[
+    { label:'Ferramentas de IA', children:[ { label:'PPP' } ]},
+    { label:'Processos' },
+    { label:'Templates' },
+  ]},
+
+  { label:'Workspace', slug:'workspace', items:[
+    { label:'Acervo' },
+    { label:'Gestão de Projetos', children:[
+      { label:'Painel de projetos (PMO)' }, { label:'Monitoramento de projetos (AW Check)' },
+      { label:'Central de maquetes' }, { label:'Portal AW Control' },
+      { label:'Monitoramento de portarias' }, { label:'As Builts' }, { label:'Arquivo morto' }
+    ]},
+    { label:'KPIs', children:[
+      { label:'KPI DNN' }, { label:'KPI Arquitetura' }, { label:'KPI Construtora' }
+    ]},
+    { label:'Estoque & Almoxarifado', children:[
+      { label:'Catálogo do Galpão AW' }, { label:'Estoque de materiais' },
+      { label:'Almoxarifes de obra' },
+      { label:'Resíduos em obras', children:[
+        { label:'Recibos de caçamba' }, { label:'Controle de serviços' }
+      ]}
+    ]},
+    { label:'Fornecedores', children:[
+      { label:'Lista de fornecedores homologados' }, { label:'Dashboard de fornecedores' },
+      { label:'Indicar um fornecedor' }, { label:'Ranking de fornecedores' },
+      { label:'Documentos de fornecedores' }, { label:'Consulta de Ccs' }
+    ]},
+    { label:'Marketing', children:[
+      { label:'Apresentação Institucional' }, { label:'Logo a|w' },
+      { label:'Brandbook' }, { label:'Fontes Oficiais' }, { label:'CRM - HubSpot' },
+      { label:'Solicitação de foto de obra / projetos' },
+      { label:'Solicitação de comunicado Interno' },
+      { label:'Solicitação de apresentação de concorrência' }
+    ]},
+  ]},
+
+  { label:'QSMS', slug:'qsms', items:[
+    { label:'Certificações' }, { label:'Políticas' },
+    { label:'Auditorias' }, { label:'Documentos' },
+    { label:'Segurança do Trabalho', children:[
+      { label:'Relatório de segurança do trabalho' }
+    ]},
+    { label:'Acessos administrativos', children:[
+      { label:'ESG', children:[
+        { label:'Ambiental' }, { label:'Social (inclusão e diversidade · PCD)' },
+        { label:'Governança' }, { label:'Comitês' }, { label:'Relatórios' }
+      ]}
+    ]},
+  ]},
+];
+
+const vagas = [
+  'Gerente de Contratos (GC)',
+  'Gerente de Obras (GO)',
+  'Engenheiro de Instalações',
+  'Profissional de Planejamento e Compras (PPC)',
+  'Profissional de Planejamento e Orçamento (PPO)',
+];
+
+const topNews = [
+  {
+    cat: 'Cultura a|w',
+    title: 'Transmissão do jogo do Brasil na a|w',
+    excerpt: 'Tem jogo importante chegando. Organizamos a transmissão das partidas no auditório e em TVs nos andares, com período lançado como banco de horas.',
+    img: 'thumb-jogo.jpg',
+    time: 'há 2 horas',
+    href: '#/noticia/transmissao-jogo'
+  },
+  {
+    cat: 'Diversidade & Inclusão',
+    title: 'Deficiência Intelectual: o que isso realmente abrange?',
+    excerpt: 'Indo além dos estereótipos: entenda o que envolve a deficiência intelectual — e por que ela não define capacidade, potencial ou talento.',
+    img: 'photo-1573496359142-b8d87734a5a2.jpg',
+    time: 'há 5 horas',
+    href: '#/noticia/deficiencia-intelectual'
+  },
+  {
+    cat: 'Inovação',
+    title: 'IAW Digital Lab: chega o programa Embaixadores IAW',
+    excerpt: 'A a|w inicia uma nova etapa na adoção estratégica de Inteligência Artificial. Conheça o programa que vai formar protagonistas dessa transformação.',
+    img: 'photo-1677442136019-21780ecad995.jpg',
+    time: 'há 1 dia',
+    href: '#/noticia/iaw-digital-lab'
+  },
+  {
+    cat: 'Benefícios',
+    title: 'a|w com você: sua chance de ter um novo apartamento é agora',
+    excerpt: 'Ação exclusiva para colaboradores a|w e familiares de primeiro grau: condições especiais em projetos Abytá (Grupo Direcional).',
+    img: 'noticia-abyta.jpg',
+    time: 'há 2 dias',
+    href: '#/noticia/abyta'
+  },
+];
+
+const treinamentos = [
+  { id:1, titulo:'PPP — Aprenda como utilizar a ferramenta que vai apoiar suas entregas.', categoria:'Universidade a|w', duracao:'',       videoSrc:'ppp.mp4' },
+  { id:2, titulo:'Rituais de gestão: reuniões que funcionam',                              categoria:'Gestão',           duracao:'12 min', videoSrc:'' },
+  { id:3, titulo:'Gestão de Horas — passo a passo no sistema',                             categoria:'Processos',        duracao:'9 min',  videoSrc:'' },
+  { id:4, titulo:'Política de viagens corporativas explicada',                             categoria:'RH',               duracao:'7 min',  videoSrc:'' },
+  { id:5, titulo:'Universidade a|w: como usar a plataforma',                               categoria:'Onboarding',       duracao:'11 min', videoSrc:'' },
+  { id:6, titulo:'Ferramentas de IA no dia a dia da a|w',                                  categoria:'IA',               duracao:'15 min', videoSrc:'' },
+];
+
+const projects = [
+  { code:'3587/25', name:'VTAL V.Olímpia Corporate',     status:'late',    display:'↓ 78% · Hoje' },
+  { code:'2025/22', name:'Ed. Volpi SIGN',               status:'ontrack', display:'↑ 99.2%' },
+  { code:'5151/24', name:'ESPAÇOLASER',                  status:'ontrack', display:'↑ 99%' },
+  { code:'6036/25', name:'Monashees Office SP',          status:'late',    display:'↓ 56% · 7d' },
+  { code:'5981/25', name:'AZ Quest',                     status:'late',    display:'↓ 69% · 12d' },
+  { code:'1822/26', name:'Nubank Capote 210',            status:'late',    display:'↓ 64% · 18d' },
+  { code:'6251/25', name:'Banco ABC Abertura Escadas',   status:'late',    display:'↓ 0% · 19d' },
+  { code:'1627/25', name:'Banco ABC',                    status:'ontrack', display:'↑ 81%' },
+  { code:'4735/25', name:'Nubank Campinas',              status:'ontrack', display:'↑ 83%' },
+  { code:'2095/25', name:'Apto Horácio Lafer 7º and.',   status:'ontrack', display:'↑ 90%' },
+  { code:'2127/26', name:'MACQuarie Construction',       status:'late',    display:'↓ 40% · 42d' },
+  { code:'1403/26', name:'GS1 Expansão',                 status:'late',    display:'↓ 20% · 47d' },
+  { code:'5134/24', name:'CTC Centro de Tecn. Canav.',   status:'done',    display:'✓ 100%' },
+  { code:'1645/25', name:'Colégio Catamarã',             status:'ontrack', display:'↑ 60%' },
+  { code:'986/24',  name:'Novartis Nova Sede',           status:'late',    display:'↓ 25% · 77d' },
+  { code:'4384/25', name:'SOFITEL Interiores',           status:'ontrack', display:'↑ 73.7%' },
+  { code:'2080/25', name:'BMA SP',                       status:'noeval',  display:'⚠ 0%' },
+  { code:'1236/26', name:'ADOBE',                        status:'ontrack', display:'↑ 60%' },
+];
+
+const statusClass = { ontrack:'t-ontrack', late:'t-late', done:'t-done', noeval:'t-noeval' };
+
+/* ─────────────────────────────────────────────
+   COMPONENT: Header — Nav com dropdowns cascateados
+───────────────────────────────────────────── */
+const PANEL_CLASS = 'menu-panel bg-white rounded-xl border border-border-soft shadow-card min-w-[260px] max-w-[300px] py-2 max-h-[calc(100vh-120px)] overflow-y-auto';
+const ITEM_BASE   = 'menu-item w-full flex items-center justify-between gap-3 px-4 py-2.5 text-sm text-text-main hover:bg-gray-soft transition-colors text-left border-l-2 border-transparent';
+const CHEVRON_SVG = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="text-text-mute shrink-0" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>';
+
+function buildPanel(items, depth, container){
+  const panel = document.createElement('div');
+  panel.className = PANEL_CLASS;
+  panel.dataset.depth = depth;
+
+  items.forEach(item => {
+    const hasChildren = Array.isArray(item.children) && item.children.length > 0;
+    const el = document.createElement(hasChildren ? 'button' : 'a');
+    if (hasChildren) { el.type = 'button'; el.setAttribute('aria-haspopup','true'); }
+    else el.href = '#';
+    el.className = ITEM_BASE + (hasChildren ? ' has-children' : '');
+    el.innerHTML = `<span class="${hasChildren ? 'font-semibold' : ''}">${item.label}</span>${hasChildren ? CHEVRON_SVG : ''}`;
+
+    if (hasChildren) {
+      el.addEventListener('mouseenter', () => openChildPanel(el, item.children, depth, container, panel));
+      el.addEventListener('focus',      () => openChildPanel(el, item.children, depth, container, panel));
+    }
+    panel.appendChild(el);
+  });
+  return panel;
+}
+
+function openChildPanel(triggerEl, children, depth, container, parentPanel){
+  // remove panels at deeper levels (cascading reset)
+  container.querySelectorAll('[data-depth]').forEach(p => {
+    if (parseInt(p.dataset.depth) > depth) p.remove();
+  });
+  // visual state nos siblings
+  parentPanel.querySelectorAll('.menu-item.has-children').forEach(s => {
+    s.classList.remove('bg-gray-soft','border-primary');
+  });
+  triggerEl.classList.add('bg-gray-soft','border-primary');
+  // monta e injeta novo panel
+  const next = buildPanel(children, depth + 1, container);
+  container.appendChild(next);
+}
+
+function closeAllDropdowns(){
+  document.querySelectorAll('.hub-dropdown').forEach(d => d.classList.add('hidden'));
+  document.querySelectorAll('[aria-expanded]').forEach(b => {
+    if (b.dataset.hubBtn) b.setAttribute('aria-expanded','false');
+  });
+}
+
+function buildHubWrap(hub, hubIdx){
+  const wrap = document.createElement('div');
+  wrap.className = 'hub-wrap relative h-[72px] flex items-center';
+
+  if (!hub.items) {
+    // link simples (Início)
+    const a = document.createElement('a');
+    a.href = hub.href || '#';
+    a.className = 'nav-item relative h-full px-4 flex items-center text-sm font-medium transition-colors ' + (hub.active ? 'text-white' : 'text-white/75 hover:text-white');
+    if (hub.active) { a.classList.add('active'); a.setAttribute('aria-current','page'); }
+    a.textContent = hub.label;
+    wrap.appendChild(a);
+    return wrap;
+  }
+
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.dataset.hubBtn = '1';
+  btn.className = 'nav-item relative h-full px-4 flex items-center text-sm font-medium text-white/75 hover:text-white transition-colors';
+  btn.textContent = hub.label;
+  btn.setAttribute('aria-haspopup','true');
+  btn.setAttribute('aria-expanded','false');
+  wrap.appendChild(btn);
+
+  const dropdown = document.createElement('div');
+  dropdown.className = 'hub-dropdown absolute top-full left-0 hidden pt-2 z-50';
+  const panelsContainer = document.createElement('div');
+  panelsContainer.className = 'flex flex-row items-start gap-1';
+  dropdown.appendChild(panelsContainer);
+  panelsContainer.appendChild(buildPanel(hub.items, 0, panelsContainer));
+  wrap.appendChild(dropdown);
+
+  let closeTimer = null;
+  const open = () => {
+    clearTimeout(closeTimer);
+    closeAllDropdowns();
+    dropdown.classList.remove('hidden');
+    btn.setAttribute('aria-expanded','true');
+  };
+  const scheduleClose = () => {
+    closeTimer = setTimeout(() => {
+      dropdown.classList.add('hidden');
+      btn.setAttribute('aria-expanded','false');
+      // limpa cascateamento
+      panelsContainer.querySelectorAll('[data-depth]').forEach(p => {
+        if (parseInt(p.dataset.depth) > 0) p.remove();
+      });
+      panelsContainer.querySelectorAll('.menu-item.has-children').forEach(s => s.classList.remove('bg-gray-soft','border-primary'));
+    }, 150);
+  };
+  wrap.addEventListener('mouseenter', open);
+  wrap.addEventListener('mouseleave', scheduleClose);
+  btn.addEventListener('focus', open);
+  btn.addEventListener('click', e => {
+    e.preventDefault();
+    const isOpen = !dropdown.classList.contains('hidden');
+    if (isOpen) { dropdown.classList.add('hidden'); btn.setAttribute('aria-expanded','false'); }
+    else open();
+  });
+
+  return wrap;
+}
+
+function buildMobileItem(item, depth){
+  const wrap = document.createElement('div');
+  const hasChildren = Array.isArray(item.children) && item.children.length > 0;
+  const padLeft = 16 + depth * 16;
+
+  const row = document.createElement(hasChildren ? 'button' : 'a');
+  if (hasChildren) row.type = 'button';
+  else row.href = item.href || '#';
+  row.className = 'w-full flex items-center justify-between gap-3 py-3 pr-5 text-sm text-white/80 hover:bg-white/5 border-b border-white/5 text-left';
+  row.style.paddingLeft = padLeft + 'px';
+  row.innerHTML = `<span class="${hasChildren ? 'font-semibold text-white' : ''}">${item.label}</span>${hasChildren ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="transition-transform" aria-hidden="true"><polyline points="6 9 12 15 18 9" stroke-linecap="round" stroke-linejoin="round"/></svg>' : ''}`;
+  wrap.appendChild(row);
+
+  if (hasChildren) {
+    const sub = document.createElement('div');
+    sub.className = 'hidden bg-black/30';
+    item.children.forEach(c => sub.appendChild(buildMobileItem(c, depth + 1)));
+    wrap.appendChild(sub);
+    row.addEventListener('click', () => {
+      const open = sub.classList.toggle('hidden');
+      row.querySelector('svg').style.transform = open ? '' : 'rotate(180deg)';
+    });
+  }
+  return wrap;
+}
+
+function renderNav(){
+  const desktop = document.getElementById('nav-desktop');
+  const mobile  = document.getElementById('nav-mobile');
+  desktop.innerHTML = '';
+  mobile.innerHTML  = '';
+
+  hubMenus.forEach((hub, idx) => {
+    // desktop
+    desktop.appendChild(buildHubWrap(hub, idx));
+
+    // mobile
+    if (!hub.items) {
+      const a = document.createElement('a');
+      a.href = hub.href || '#';
+      a.className = 'block px-5 py-3.5 text-sm text-white border-b border-white/5 ' + (hub.active ? 'text-primary font-semibold' : 'hover:bg-white/5');
+      a.textContent = hub.label;
+      mobile.appendChild(a);
+    } else {
+      const hubWrap = document.createElement('div');
+      const hubRow = document.createElement('button');
+      hubRow.type = 'button';
+      hubRow.className = 'w-full flex items-center justify-between px-5 py-3.5 text-sm font-semibold text-white border-b border-white/5 hover:bg-white/5';
+      hubRow.innerHTML = `<span>${hub.label}</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="transition-transform" aria-hidden="true"><polyline points="6 9 12 15 18 9" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+      const sub = document.createElement('div');
+      sub.className = 'hidden bg-black/20';
+      hub.items.forEach(it => sub.appendChild(buildMobileItem(it, 1)));
+      hubRow.addEventListener('click', () => {
+        const open = sub.classList.toggle('hidden');
+        hubRow.querySelector('svg').style.transform = open ? '' : 'rotate(180deg)';
+      });
+      hubWrap.appendChild(hubRow);
+      hubWrap.appendChild(sub);
+      mobile.appendChild(hubWrap);
+    }
+  });
+
+  // fechar dropdowns ao clicar fora
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.hub-wrap')) closeAllDropdowns();
+  });
+}
+
+/* ─────────────────────────────────────────────
+   COMPONENT: Ticker — Projetos
+───────────────────────────────────────────── */
+function renderTicker(){
+  const track = document.getElementById('ticker-track');
+  const html = projects.map(p => `
+    <span class="inline-flex items-center gap-2 px-5 h-10 border-r border-white/5">
+      <span class="text-[11px] text-white/40">${p.code}</span>
+      <span class="text-xs text-white/80 font-medium">${p.name}</span>
+      <span class="text-xs font-bold ${statusClass[p.status]}">${p.display}</span>
+    </span>
+  `).join('');
+  track.innerHTML = html + html; // duplicado para loop infinito
+}
+
+/* ─────────────────────────────────────────────
+   COMPONENT: Indica AW — Lista de vagas
+───────────────────────────────────────────── */
+function renderVagas(){
+  const list = document.getElementById('vagas-list');
+  list.innerHTML = vagas.map(v => `
+    <li>
+      <button type="button" class="vaga-card w-full flex items-center justify-between gap-3 px-4 py-3.5 rounded-lg border border-border-soft bg-white text-left">
+        <span class="text-sm font-semibold text-text-main leading-tight">${v}</span>
+        <svg class="vaga-arrow shrink-0 text-text-mute" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <polyline points="9 18 15 12 9 6"/>
+        </svg>
+      </button>
+    </li>
+  `).join('');
+}
+
+/* ─────────────────────────────────────────────
+   COMPONENT: News Grid — Acontece na a|w
+───────────────────────────────────────────── */
+function renderNews(){
+  const grid = document.getElementById('news-grid');
+  grid.innerHTML = topNews.map(n => {
+    // Media: vídeo embedado OU imagem
+    const media = n.videoEmbed
+      ? `<div class="aspect-[16/10] overflow-hidden bg-black relative">
+           <iframe src="${n.videoEmbed}" title="${n.title}" loading="lazy"
+             class="absolute inset-0 w-full h-full"
+             frameborder="0"
+             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+             allowfullscreen></iframe>
+         </div>`
+      : `<a href="${n.href}" class="block aspect-[16/10] overflow-hidden bg-gray-soft" aria-label="Abrir notícia: ${n.title}">
+           <img src="${n.img}" alt="${n.title}" loading="lazy"
+                class="w-full h-full object-cover transition-transform duration-500 ease-out hover:scale-[1.05]"/>
+         </a>`;
+
+    // Body sempre é link pro post (mesmo com vídeo no topo)
+    const body = `
+      <a href="${n.href}" class="block p-5 hover:bg-gray-soft/30 transition-colors">
+        <span class="inline-flex items-center px-2.5 py-1 rounded-md bg-primary text-dark text-[10px] font-extrabold uppercase tracking-[0.12em] mb-3">
+          ${n.cat}
+        </span>
+        <h3 class="text-[17px] font-bold text-text-main leading-snug tracking-tight mb-2 line-clamp-2">
+          ${n.title}
+        </h3>
+        <p class="text-sm text-text-mute leading-relaxed line-clamp-2 mb-4">
+          ${n.excerpt}
+        </p>
+        <div class="flex items-center gap-1.5 text-xs text-text-mute font-medium">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+          </svg>
+          ${n.time}
+        </div>
+      </a>`;
+
+    return `
+      <article class="news-card rounded-xl overflow-hidden bg-white border border-border-soft shadow-card hover:shadow-card-hover hover:border-primary/50">
+        ${media}
+        ${body}
+      </article>
+    `;
+  }).join('');
+}
+
+/* ─────────────────────────────────────────────
+   COMPONENT: Playlist — Universidade a|w
+───────────────────────────────────────────── */
+let activeVideoId = 1;
+
+function renderPlaylist(){
+  const list = document.getElementById('playlist');
+  list.innerHTML = treinamentos.map((v, i) => `
+    <li>
+      <button type="button" data-id="${v.id}"
+              class="playlist-item ${v.id === activeVideoId ? 'active' : ''} w-full flex items-start gap-3 px-3 py-3 text-left border-l-2 border-transparent hover:bg-white/5 transition-colors">
+        <span class="playlist-num shrink-0 w-7 h-7 rounded-md bg-white/8 text-white/40 text-xs font-bold flex items-center justify-center mt-0.5">${i + 1}</span>
+        <span class="flex-1 min-w-0">
+          <span class="playlist-title block text-[13px] text-white/60 leading-snug line-clamp-2">${v.titulo}</span>
+          <span class="playlist-meta block mt-1 text-[11px] text-white/30">${v.duracao ? v.duracao + ' · ' : ''}${v.categoria}</span>
+        </span>
+      </button>
+    </li>
+  `).join('');
+
+  // listeners
+  list.querySelectorAll('button[data-id]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const id = parseInt(btn.dataset.id);
+      const t = treinamentos.find(x => x.id === id);
+      if (!t) return;
+      activeVideoId = id;
+
+      const vidEl   = document.getElementById('vid-video');
+      const overlay = document.getElementById('vid-play-overlay');
+      const cat     = document.getElementById('vid-cat');
+      const name    = document.getElementById('vid-name');
+      cat.textContent  = t.categoria;
+      name.textContent = t.titulo;
+
+      if (t.videoSrc) {
+        vidEl.src = t.videoSrc;
+        vidEl.removeAttribute('controls');
+        overlay.classList.remove('hidden');
+      } else {
+        vidEl.pause();
+        vidEl.src = '';
+        overlay.classList.add('hidden');
+      }
+      renderPlaylist();
+    });
+  });
+}
+
+/* ─────────────────────────────────────────────
+   BEHAVIOR: Play overlay no vídeo
+───────────────────────────────────────────── */
+function initVideo(){
+  const overlay = document.getElementById('vid-play-overlay');
+  const vidEl   = document.getElementById('vid-video');
+  if (!overlay || !vidEl) return;
+  overlay.addEventListener('click', () => {
+    overlay.classList.add('hidden');
+    vidEl.setAttribute('controls','');
+    vidEl.play().catch(()=>{});
+  });
+  vidEl.addEventListener('ended', () => {
+    vidEl.removeAttribute('controls');
+    overlay.classList.remove('hidden');
+  });
+}
+
+/* ─────────────────────────────────────────────
+   BEHAVIOR: Mobile menu toggle
+───────────────────────────────────────────── */
+function initMobileMenu(){
+  const btn = document.getElementById('btn-mobile');
+  const nav = document.getElementById('nav-mobile');
+  const iconMenu  = document.getElementById('icon-menu');
+  const iconClose = document.getElementById('icon-close');
+  btn.addEventListener('click', () => {
+    const open = !nav.classList.contains('hidden') ? false : true;
+    nav.classList.toggle('hidden', !open);
+    iconMenu.classList.toggle('hidden', open);
+    iconClose.classList.toggle('hidden', !open);
+    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    btn.setAttribute('aria-label', open ? 'Fechar menu' : 'Abrir menu');
+  });
+}
+
+/* ─────────────────────────────────────────────
+   INIT
+───────────────────────────────────────────── */
+renderNav();
+renderTicker();
+renderVagas();
+renderNews();
+renderPlaylist();
+initVideo();
+initMobileMenu();
+</script>
+</body>
+</html>
