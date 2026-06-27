@@ -173,7 +173,7 @@
 <div role="region" aria-label="Status de projetos e obras" class="bg-dark border-b border-white/5 overflow-hidden">
   <div class="flex items-center h-10">
     <div class="flex items-center px-5 h-full bg-primary">
-      <span class="text-[11px] font-extrabold text-dark uppercase tracking-widest whitespace-nowrap">Projetos / Obras</span>
+      <span class="text-[11px] font-extrabold text-dark uppercase tracking-widest whitespace-nowrap">Obras</span>
     </div>
     <div class="relative flex-1 overflow-hidden">
       <div class="absolute left-0 top-0 w-12 h-full bg-gradient-to-r from-dark to-transparent z-10 pointer-events-none"></div>
@@ -196,7 +196,7 @@
     <a href="#/noticia/politicas-corporativas"
        class="group relative block overflow-hidden rounded-2xl bg-dark aspect-video lg:aspect-auto min-h-[260px] lg:min-h-[540px] shadow-card">
       <img src="noticia-home.jpg" alt="Equipe da Athié Wohnrath em escritório" loading="lazy"
-           class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03]"/>
+           class="absolute inset-0 w-full h-full object-contain lg:object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03]"/>
       <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-black/10"></div>
 
       <div class="absolute inset-0 p-8 lg:p-10 flex flex-col justify-end">
@@ -440,9 +440,7 @@
 const PRIMARY = '#00C7C7';
 
 const hubMenus = [
-  { label:'Início', slug:'inicio', href:'#/', active:true, items:null },
-
-  { label:'AW', slug:'aw', items:[
+  { label:'AW', slug:'aw', active:true, items:[
     { label:'Metodologia e Padrões', children:[
       { label:'Brown Paper', children:[
         { label:'Interiores' }, { label:'Predial e retrofit' }
@@ -1022,5 +1020,4 @@ renderPlaylist();
 initVideo();
 initMobileMenu();
 </script>
-</body>
-</html>
+</body>                                                               
